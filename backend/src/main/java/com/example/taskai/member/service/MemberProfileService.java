@@ -112,6 +112,10 @@ public class MemberProfileService {
         if (user == null) {
             throw new BusinessException(404, "用户不存在", HttpStatus.NOT_FOUND);
         }
+        if (request.phone() != null) {
+            user.setPhone(request.phone());
+            sysUserMapper.updateById(user);
+        }
 
         MemberProfile profile = memberProfileMapper.selectOne(
             new LambdaQueryWrapper<MemberProfile>().eq(MemberProfile::getUserId, userId)

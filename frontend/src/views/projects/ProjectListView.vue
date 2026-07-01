@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import {
@@ -13,8 +13,12 @@ import {
 } from '../../api/projects'
 import { getUserList, type UserListItem } from '../../api/users'
 import type { PageResult, ProjectStatus } from '../../api/types'
+import { useAuthStore } from '../../stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
+const isAdmin = computed(() => authStore.user?.role === 'ADMIN')
+const currentUserId = computed(() => authStore.user?.id ?? 0)
 
 const keyword = ref('')
 const statusFilter = ref('')
@@ -72,6 +76,10 @@ async function loadList() {
 }
 
 async function loadUsers() {
+  if (!isAdmin.value) {
+    users.value = []
+    return
+  }
   try {
     const result = await getUserList({ status: 'ENABLED', size: 100 })
     users.value = result.records
@@ -94,7 +102,7 @@ function openCreate() {
   editingId.value = null
   form.projectName = ''
   form.description = ''
-  form.managerId = users.value.length > 0 ? users.value[0].id : 0
+  form.managerId = isAdmin.value ? (users.value.length > 0 ? users.value[0].id : 0) : currentUserId.value
   form.status = 'NOT_STARTED'
   form.startDate = ''
   form.endDate = ''
@@ -106,7 +114,7 @@ function openEdit(item: ProjectListItem) {
   editingId.value = item.id
   form.projectName = item.projectName
   form.description = item.description || ''
-  form.managerId = item.managerId
+  form.managerId = isAdmin.value ? item.managerId : currentUserId.value
   form.status = item.status
   form.startDate = item.startDate || ''
   form.endDate = item.endDate || ''
@@ -119,20 +127,26 @@ async function handleSubmit() {
     formError.value = '请输入项目名称'
     return
   }
-  if (!form.managerId) {
+  if (isAdmin.value && !form.managerId) {
     formError.value = '请选择负责人'
+    return
+  }
+  if (!isAdmin.value && !currentUserId.value) {
+    formError.value = '当前用户信息失效，请重新登录'
     return
   }
   formLoading.value = true
   formError.value = ''
   try {
-    const base = {
+    const base: ProjectCreatePayload = {
       projectName: form.projectName,
       description: form.description || undefined,
-      managerId: form.managerId,
       status: form.status,
       startDate: form.startDate || undefined,
       endDate: form.endDate || undefined,
+    }
+    if (isAdmin.value) {
+      base.managerId = form.managerId
     }
     if (editingId.value !== null) {
       await updateProject(editingId.value, base as ProjectUpdatePayload)
@@ -337,7 +351,7 @@ onMounted(() => {
               placeholder="项目名称"
             />
           </label>
-          <label class="block">
+          <label v-if="isAdmin" class="block">
             <span class="text-sm font-medium text-slate-700">负责人</span>
             <select
               v-model="form.managerId"

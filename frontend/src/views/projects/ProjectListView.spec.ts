@@ -8,6 +8,11 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mockPush }),
 }))
 
+const mockCurrentUser = vi.fn()
+vi.mock('../../stores/auth', () => ({
+  useAuthStore: () => ({ user: mockCurrentUser() }),
+}))
+
 const mockGetProjectList = vi.fn()
 const mockCreateProject = vi.fn()
 const mockUpdateProject = vi.fn()
@@ -78,6 +83,7 @@ function sampleUsers() {
 describe('ProjectListView', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockCurrentUser.mockReturnValue({ id: 1, username: 'admin', realName: '管理员', role: 'ADMIN' })
     mockGetProjectList.mockResolvedValue(sampleProjects())
     mockGetUserList.mockResolvedValue(sampleUsers())
     mockCreateProject.mockResolvedValue(undefined)
@@ -136,6 +142,28 @@ describe('ProjectListView', () => {
 
     expect(mockCreateProject).toHaveBeenCalled()
     expect(mockGetProjectList).toHaveBeenCalledTimes(2)
+  })
+
+  it('allows manager project creation without user list permission', async () => {
+    mockCurrentUser.mockReturnValue({ id: 2, username: 'manager', realName: '项目经理', role: 'MANAGER' })
+    mockGetUserList.mockRejectedValue(new Error('无权限访问'))
+    const wrapper = mount(ProjectListView)
+    await flushPromises()
+
+    const addButton = wrapper.findAll('button').find((b) => b.text() === '新建项目')!
+    await addButton.trigger('click')
+
+    const nameInput = wrapper.find('.fixed input:not([type])')
+    await nameInput.setValue('经理项目')
+
+    const saveButton = wrapper.findAll('.fixed button').find((b) => b.text() === '保存')!
+    await saveButton.trigger('submit')
+    await flushPromises()
+
+    const payload = mockCreateProject.mock.calls[0][0]
+    expect(payload).toMatchObject({ projectName: '经理项目' })
+    expect(payload).not.toHaveProperty('managerId')
+    expect(mockGetUserList).not.toHaveBeenCalled()
   })
 
   it('navigates to project detail', async () => {

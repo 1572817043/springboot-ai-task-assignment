@@ -20,6 +20,7 @@ describe('auth store', () => {
     vi.mocked(loginApi).mockResolvedValue({
       token: 'token-manager',
       user: {
+        id: 2,
         username: 'manager',
         realName: '项目经理',
         role: 'MANAGER',
@@ -40,11 +41,11 @@ describe('auth store', () => {
 
   it('logout clears token and user from store and localStorage', () => {
     localStorage.setItem('token', 'token-manager')
-    localStorage.setItem('user', JSON.stringify({ username: 'manager', realName: '项目经理', role: 'MANAGER' }))
+    localStorage.setItem('user', JSON.stringify({ id: 2, username: 'manager', realName: '项目经理', role: 'MANAGER' }))
 
     const store = useAuthStore()
     store.token = 'token-manager'
-    store.user = { username: 'manager', realName: '项目经理', role: 'MANAGER' }
+    store.user = { id: 2, username: 'manager', realName: '项目经理', role: 'MANAGER' }
 
     store.logout()
 

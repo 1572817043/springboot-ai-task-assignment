@@ -35,6 +35,7 @@ describe('LoginView', () => {
     vi.mocked(loginApi).mockResolvedValue({
       token: 'token-manager',
       user: {
+        id: 2,
         username: 'manager',
         realName: '项目经理',
         role: 'MANAGER',

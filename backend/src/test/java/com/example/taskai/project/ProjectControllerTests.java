@@ -113,7 +113,7 @@ class ProjectControllerTests {
     void managerCanCreateProject() throws Exception {
         mockManagerToken();
         when(projectService.resolveUserId("manager")).thenReturn(2L);
-        doNothing().when(projectService).createProject(any(ProjectCreateRequest.class), eq(2L));
+        doNothing().when(projectService).createProject(any(ProjectCreateRequest.class), eq("MANAGER"), eq(2L));
 
         mockMvc.perform(post("/api/projects")
                 .header("Authorization", MANAGER_HEADER)
@@ -124,7 +124,7 @@ class ProjectControllerTests {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.code").value(200));
 
-        verify(projectService).createProject(any(ProjectCreateRequest.class), eq(2L));
+        verify(projectService).createProject(any(ProjectCreateRequest.class), eq("MANAGER"), eq(2L));
     }
 
     @Test

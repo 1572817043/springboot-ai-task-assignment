@@ -57,8 +57,10 @@ public class ProjectService {
     }
 
     @Transactional
-    public void createProject(ProjectCreateRequest request, Long currentUserId) {
-        Long managerId = request.managerId() != null ? request.managerId() : currentUserId;
+    public void createProject(ProjectCreateRequest request, String role, Long currentUserId) {
+        Long managerId = "ADMIN".equals(role) && request.managerId() != null
+            ? request.managerId()
+            : currentUserId;
         SysUser manager = sysUserMapper.selectById(managerId);
         if (manager == null) {
             throw new BusinessException(400, "负责人不存在", HttpStatus.BAD_REQUEST);
@@ -100,6 +102,9 @@ public class ProjectService {
             project.setDescription(request.description());
         }
         if (request.managerId() != null) {
+            if (!"ADMIN".equals(role) && !request.managerId().equals(project.getManagerId())) {
+                throw new BusinessException(403, "无权限变更项目负责人", HttpStatus.FORBIDDEN);
+            }
             SysUser manager = sysUserMapper.selectById(request.managerId());
             if (manager == null) {
                 throw new BusinessException(400, "负责人不存在", HttpStatus.BAD_REQUEST);

@@ -18,7 +18,8 @@ public interface MemberProfileMapper extends BaseMapper<MemberProfile> {
                IFNULL(mp.completed_task_count, 0) AS completedTaskCount,
                IFNULL(mp.overdue_task_count, 0) AS overdueTaskCount,
                IFNULL(mp.task_completion_rate, 0) AS taskCompletionRate,
-               IFNULL(mp.overdue_rate, 0) AS overdueRate
+               IFNULL(mp.overdue_rate, 0) AS overdueRate,
+               NULL AS skills
         FROM sys_user u
         INNER JOIN sys_user_role ur ON ur.user_id = u.id
         INNER JOIN sys_role r ON r.id = ur.role_id AND r.role_code = 'MEMBER'

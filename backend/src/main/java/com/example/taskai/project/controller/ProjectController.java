@@ -65,7 +65,7 @@ public class ProjectController {
             throw new BusinessException(403, "无权限创建项目", HttpStatus.FORBIDDEN);
         }
         Long userId = resolveUserId(httpRequest, role);
-        projectService.createProject(request, userId);
+        projectService.createProject(request, role, userId);
         return ApiResponse.ok(null);
     }
 

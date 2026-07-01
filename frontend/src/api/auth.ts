@@ -6,6 +6,7 @@ export interface LoginPayload {
 }
 
 export interface CurrentUser {
+  id: number
   username: string
   realName: string
   role: 'ADMIN' | 'MANAGER' | 'MEMBER'
@@ -23,4 +24,3 @@ export function login(payload: LoginPayload): Promise<LoginResult> {
 export function getCurrentUser(): Promise<CurrentUser> {
   return request.get('/auth/me') as unknown as Promise<CurrentUser>
 }
-

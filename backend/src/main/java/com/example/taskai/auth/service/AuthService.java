@@ -38,7 +38,7 @@ public class AuthService {
 		SysRole role = sysRoleMapper.selectRoleByUserId(user.getId());
 		String roleCode = role != null ? role.getRoleCode() : "MEMBER";
 		String token = tokenService.createToken(user.getUsername(), roleCode);
-		return new LoginResponse(token, new CurrentUserVO(user.getUsername(), user.getRealName(), roleCode));
+		return new LoginResponse(token, new CurrentUserVO(user.getId(), user.getUsername(), user.getRealName(), roleCode));
 	}
 
 	public CurrentUserVO currentUser(String authorization) {
@@ -55,7 +55,7 @@ public class AuthService {
 		}
 		SysRole role = sysRoleMapper.selectRoleByUserId(user.getId());
 		String roleCode = role != null ? role.getRoleCode() : "MEMBER";
-		return new CurrentUserVO(user.getUsername(), user.getRealName(), roleCode);
+		return new CurrentUserVO(user.getId(), user.getUsername(), user.getRealName(), roleCode);
 	}
 
 	private String readBearerToken(String authorization) {

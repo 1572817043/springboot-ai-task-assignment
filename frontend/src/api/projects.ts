@@ -40,7 +40,7 @@ export interface ProjectDetail {
 export interface ProjectCreatePayload {
   projectName: string
   description?: string
-  managerId: number
+  managerId?: number
   status?: ProjectStatus
   startDate?: string
   endDate?: string
@@ -49,7 +49,7 @@ export interface ProjectCreatePayload {
 export interface ProjectUpdatePayload {
   projectName: string
   description?: string
-  managerId: number
+  managerId?: number
   status?: ProjectStatus
   startDate?: string
   endDate?: string

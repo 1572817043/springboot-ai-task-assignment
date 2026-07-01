@@ -3,6 +3,7 @@ package com.example.taskai.member.dto;
 import java.math.BigDecimal;
 
 public record MemberProfileUpdateRequest(
+    String phone,
     String resumeText,
     String experienceSummary,
     Integer currentWorkload,
